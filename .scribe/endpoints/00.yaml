@@ -1,0 +1,104 @@
+name: Endpoints
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - GET
+    uri: api/user
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/docs
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Invoke the controller method.'
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |
+          <!doctype html>
+          <html>
+          <head>
+              <meta charset="utf-8"/>
+              <title>API Docs</title>
+              <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
+              <style>body{margin:0}</style>
+          </head>
+          <body>
+          <div id="swagger"></div>
+          <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+          <script>
+              window.ui = SwaggerUIBundle({
+                  url: '/docs/openapi.yaml',      // Scribe кладе файл сюди
+                  dom_id: '#swagger'
+              });
+          </script>
+          </body>
+          </html>
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: X-Inertia
+          access-control-allow-origin: '*'
+          set-cookie: 'XSRF-TOKEN=eyJpdiI6IjdqVE9yM1crTkozTGhoVExDVkZFSlE9PSIsInZhbHVlIjoiZG1JbHVZRjh2MStGbXkxSFV4SkxMRFFrTmROSGlCZG1hWHVpc3NXUlZMbWpPVmplaE9OWFg2UDYrNWg1NnduZjVadXY5TFRxcVExdU9lNVVMQ2t0VUp3QXFxWTB0Q3E4TVpGZ2JOVjhORmVOSjZPclVaTStwclZpNk93YWxnbTkiLCJtYWMiOiIyNGFiZmIwMjIxOGE4Njg1NWJhYTA3Y2EzMWE0YTZiYmI3NDE5NzI3MmEyYjkyY2NlZTA2ZmQxZGE0ZjdiYzRjIiwidGFnIjoiIn0%3D; expires=Sun, 24 Aug 2025 03:20:31 GMT; Max-Age=7200; path=/; samesite=lax; laravel_session=eyJpdiI6IlB0dHdHY1ZTUkxsa3NFNElIR0FEL0E9PSIsInZhbHVlIjoiSXc5bzQwNHNWa1o5amVlRTJDYWZLeFF4VSs5Tjh2Nnc5c1RsWG1mT0J1UFBVZCttMGsrcHBnZGFRVkhNZ205SmcwRWxlbm1Ec09lazBTN2tQMXV3V2xqY011UFVNMnpSYWduZlNKa1RBTVNGcGJBa1dhdks0WGhUTE5MME5YT2wiLCJtYWMiOiI4ZTA2MjgyNTk3NWJiMDllZTBkYmRhZDAxNGY1NGZlZGM3OGQxMDdhZjMzZTEwZGJhMzYzYzZiYjgwOTg2MmEyIiwidGFnIjoiIn0%3D; expires=Sun, 24 Aug 2025 03:20:31 GMT; Max-Age=7200; path=/; httponly; samesite=lax'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
