@@ -22,8 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            EnsureFrontendRequestsAreStateful::class,//todo:maybe delete
+          //  EnsureFrontendRequestsAreStateful::class,//todo:maybe delete
         ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -1,0 +1,336 @@
+name: Me
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - GET
+    uri: api/me/profile
+    metadata:
+      groupName: Me
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get my profile (owner or admin with ?user_id=UUID).'
+      description: ''
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Authorization: 'Bearer Bearer {token}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      user_id:
+        name: user_id
+        description: 'UUID of another user (admin only).'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      user_id: architecto
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"profile":{"user_id":"0198...","display_name":"Andrii","bio":null,"photo_asset_id":null,"birth_date":null,"favorite_phrases":[]}}'
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: '{"message":"Forbidden."}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer Bearer {token}'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: api/me/profile
+    metadata:
+      groupName: Me
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update my profile (owner or admin with ?user_id=UUID).'
+      description: ''
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Authorization: 'Bearer Bearer {token}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      user_id:
+        name: user_id
+        description: 'UUID of another user (admin only).'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      user_id: architecto
+    bodyParameters:
+      display_name:
+        name: display_name
+        description: 'max:255'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      bio:
+        name: bio
+        description: 'max:2000'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      photo_asset_id:
+        name: photo_asset_id
+        description: uuid
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      birth_date:
+        name: birth_date
+        description: ''
+        required: false
+        example: architecto
+        type: date
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      favorite_phrases:
+        name: favorite_phrases
+        description: 'of strings'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      display_name: architecto
+      bio: architecto
+      photo_asset_id: architecto
+      birth_date: architecto
+      favorite_phrases:
+        - architecto
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"profile":{"user_id":"0198...","display_name":"Andrii","bio":"hello","photo_asset_id":null,"birth_date":"1990-01-01","favorite_phrases":["..."]}}'
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: '{"message":"The given data was invalid.","errors":{"display_name":["The display name may not be greater than 255 characters."]}}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer Bearer {token}'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/me/settings
+    metadata:
+      groupName: Me
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get my settings (owner or admin with ?user_id=UUID).'
+      description: ''
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Authorization: 'Bearer Bearer {token}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      user_id:
+        name: user_id
+        description: 'UUID of another user (admin only).'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      user_id: architecto
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"settings":{"user_id":"0198...","tz":"America/Edmonton","locale":"uk","privacy":{},"notifications":{}}}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer Bearer {token}'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: api/me/settings
+    metadata:
+      groupName: Me
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update my settings (owner or admin with ?user_id=UUID).'
+      description: ''
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Authorization: 'Bearer Bearer {token}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      user_id:
+        name: user_id
+        description: 'UUID of another user (admin only).'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      user_id: architecto
+    bodyParameters:
+      tz:
+        name: tz
+        description: ''
+        required: true
+        example: America/Edmonton
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      locale:
+        name: locale
+        description: ''
+        required: true
+        example: uk
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      privacy:
+        name: privacy
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      notifications:
+        name: notifications
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      tz: America/Edmonton
+      locale: uk
+      privacy: []
+      notifications: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"settings":{"user_id":"0198...","tz":"America/Edmonton","locale":"uk","privacy":{},"notifications":{}}}'
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: '{"message":"The given data was invalid.","errors":{"tz":["The tz field is required."]}}'
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer Bearer {token}'
+    controller: null
+    method: null
+    route: null
+    custom: []
