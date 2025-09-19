@@ -2,33 +2,44 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
         Schema::create('subscriptions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('user_id');
-            $table->uuid('plan_id');
-            $table->string('status')->default('active');
+            $table->bigIncrements('id');          // internal PK
+            $table->uuid('uuid')->unique();       // public id
+
+            $table->foreignId('user_id')          // BIGINT FK -> users.id
+            ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->foreignId('plan_id')          // BIGINT FK -> plans.id
+            ->constrained('plans');
+
+            $table->string('status')->default('active'); // active/paused/cancelled/expired
             $table->timestampTz('current_period_start');
             $table->timestampTz('current_period_end');
             $table->timestampTz('cancel_at')->nullable();
 
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreign('plan_id')->references('id')->on('plans');
             $table->index('user_id');
+            $table->index('plan_id');
+            $table->index(['status', 'current_period_end']);
         });
+
+        // (опційно) одна активна підписка на користувача:
+        DB::statement("
+          CREATE UNIQUE INDEX subscriptions_one_active_per_user
+          ON subscriptions (user_id)
+          WHERE status = 'active'
+        ");
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('subscriptions');

@@ -2,38 +2,55 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
         Schema::create('persons', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('owner_user_id');
+            $table->bigIncrements('id');        // internal PK
+            $table->uuid('uuid')->unique();     // public identifier
+
+            $table->foreignId('owner_user_id')  // BIGINT FK -> users.id
+            ->constrained('users')
+                ->cascadeOnDelete();
+
             $table->string('full_name');
             $table->date('birth_date')->nullable();
             $table->date('death_date')->nullable();
             $table->text('bio')->nullable();
-            $table->uuid('photo_asset_id')->nullable();
-            $table->boolean('is_user_linked')->default(false);
-            $table->uuid('linked_user_id')->nullable();
 
-            $table->foreign('owner_user_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreign('photo_asset_id')->references('id')->on('assets')->nullOnDelete();
-            $table->foreign('linked_user_id')->references('id')->on('users')->nullOnDelete();
+            $table->foreignId('photo_asset_id') // BIGINT FK -> assets.id
+            ->nullable()
+                ->constrained('assets')
+                ->nullOnDelete();
+
+            $table->boolean('is_user_linked')->default(false);
+
+            $table->foreignId('linked_user_id') // BIGINT FK -> users.id
+            ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             $table->index('owner_user_id');
             $table->index('full_name');
         });
+
+        // Опційно: гарантуємо узгодженість полів лінкування
+        DB::statement("
+          ALTER TABLE persons
+          ADD CONSTRAINT persons_link_check
+          CHECK (
+            (is_user_linked = true  AND linked_user_id IS NOT NULL) OR
+            (is_user_linked = false AND linked_user_id IS NULL)
+          )
+        ");
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('persons');

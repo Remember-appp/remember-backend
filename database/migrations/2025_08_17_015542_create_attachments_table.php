@@ -2,31 +2,35 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
         Schema::create('attachments', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('message_id');
-            $table->uuid('asset_id');
-            $table->string('kind');     // text/photo/video/audio/doc
+            $table->bigIncrements('id');            // internal PK
+            $table->uuid('uuid')->unique();         // public identifier
+
+            $table->foreignId('message_id')         // BIGINT FK -> messages.id
+            ->constrained('messages')
+                ->cascadeOnDelete();
+
+            $table->foreignId('asset_id')           // BIGINT FK -> assets.id
+            ->constrained('assets')
+                ->restrictOnDelete();
+
+            $table->string('kind');                 // text/photo/video/audio/doc
             $table->integer('position')->default(0);
 
-            $table->foreign('message_id')->references('id')->on('messages')->cascadeOnDelete();
-            $table->foreign('asset_id')->references('id')->on('assets')->restrictOnDelete();
             $table->index('message_id');
+            $table->index(['message_id','position']); // common ordering query
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('attachments');

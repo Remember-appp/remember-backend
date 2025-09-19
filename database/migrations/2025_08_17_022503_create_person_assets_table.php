@@ -2,31 +2,34 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('person_assets', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('person_id');
-            $table->uuid('asset_id');
-            $table->string('kind'); // photo/video/doc
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
 
-            $table->foreign('person_id')->references('id')->on('persons')->cascadeOnDelete();
-            $table->foreign('asset_id')->references('id')->on('assets')->restrictOnDelete();
+        Schema::create('person_assets', function (Blueprint $table) {
+            $table->bigIncrements('id');       // internal PK
+            $table->uuid('uuid')->unique();    // public identifier
+
+            $table->foreignId('person_id')     // BIGINT FK -> persons.id
+            ->constrained('persons')
+                ->cascadeOnDelete();
+
+            $table->foreignId('asset_id')      // BIGINT FK -> assets.id
+            ->constrained('assets')
+                ->restrictOnDelete();
+
+            $table->string('kind');            // photo/video/doc
 
             $table->index('person_id');
+            $table->index(['person_id','kind']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('person_assets');

@@ -2,17 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TrustedContact extends Model
 {
-    use HasUuids;
-
     public $timestamps = false;
 
     protected $fillable = [
+        'uuid',
         'user_id',
         'name',
         'relation',
@@ -20,10 +18,15 @@ class TrustedContact extends Model
         'phone',
         'quorum_group',
         'created_at',
-        ];
-    protected $casts = [
-        'created_at'=>'datetime',
-        ];
+    ];
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    protected $casts = [
+        'uuid' => 'string',
+        'created_at' => 'datetime',
+    ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

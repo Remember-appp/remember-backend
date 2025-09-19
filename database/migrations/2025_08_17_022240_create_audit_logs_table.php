@@ -3,35 +3,40 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
         Schema::create('audit_logs', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('actor_user_id')->nullable();
-            $table->string('scope');         // profile/message/case/...
-            $table->string('action');        // create/update/delete/view/...
+            $table->bigIncrements('id');       // internal PK
+            $table->uuid('uuid')->unique();    // public identifier
+
+            $table->foreignId('actor_user_id') // BIGINT FK -> users.id
+            ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->string('scope');           // profile/message/case/...
+            $table->string('action');          // create/update/delete/view/...
             $table->string('entity_table');
-            $table->uuid('entity_id')->nullable();
-            $table->json('meta')->default(new Expression("'{}'::json"));
+
+            // для entity_id залишаємо UUID (воно може вказувати на будь-яку сутність)
+            $table->uuid('entity_uuid')->nullable();
+
+            $table->json('meta')->default(DB::raw("'{}'::json"));
             $table->timestampTz('created_at')->useCurrent();
 
-            $table->foreign('actor_user_id')->references('id')->on('users')->nullOnDelete();
             $table->index('created_at');
             $table->index('scope');
             $table->index('action');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('audit_logs');
