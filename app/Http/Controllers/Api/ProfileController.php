@@ -5,25 +5,18 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Requests\UpdateSettingsRequest;
+use App\Models\Asset;
 use App\Models\UserProfile;
 use App\Models\UserSetting;
+use App\Services\FileStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
-/**
- * @group Me
- */
 class ProfileController extends Controller
 {
-    /**
-     * Get my profile (owner or admin with ?user_id=UUID).
-     *
-     * @authenticated
-     * @queryParam user_id string UUID of another user (admin only).
-     * @response 200 {"profile":{"user_id":"0198...","display_name":"Andrii","bio":null,"photo_asset_id":null,"birth_date":null,"favorite_phrases":[]}}
-     * @response 401 {"message":"Unauthenticated."}
-     * @response 403 {"message":"Forbidden."}
-     */
+    public function __construct(private FileStorageService $files) {}
+
     public function get(Request $request): JsonResponse
     {
         $u = $request->user();
@@ -35,22 +28,11 @@ class ProfileController extends Controller
         $profile = UserProfile::firstOrCreate(['user_id' => $targetId]);
         $this->authorize('view', $profile);
 
-        return response()->json(['profile' => $profile]);
+        return response()->json([
+            'profile' => $this->decorateProfile($profile),
+        ]);
     }
 
-    /**
-     * Update my profile (owner or admin with ?user_id=UUID).
-     *
-     * @authenticated
-     * @queryParam user_id string UUID of another user (admin only).
-     * @bodyParam display_name string max:255
-     * @bodyParam bio string max:2000
-     * @bodyParam photo_asset_id string uuid
-     * @bodyParam birth_date date
-     * @bodyParam favorite_phrases array of strings
-     * @response 200 {"profile":{"user_id":"0198...","display_name":"Andrii","bio":"hello","photo_asset_id":null,"birth_date":"1990-01-01","favorite_phrases":["..."]}}
-     * @response 422 {"message":"The given data was invalid.","errors":{"display_name":["The display name may not be greater than 255 characters."]}}
-     */
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         $u = $request->user();
@@ -62,18 +44,19 @@ class ProfileController extends Controller
         $profile = UserProfile::firstOrCreate(['user_id' => $targetId]);
         $this->authorize('update', $profile);
 
-        $profile->fill($request->validated())->save();
+        $data = $request->validated();
 
-        return response()->json(['profile' => $profile]);
+        if (!empty($data['photo_asset_uuid']) && empty($data['photo_asset_id'])) {
+            $asset = \App\Models\Asset::where('uuid', $data['photo_asset_uuid'])->first();
+            $data['photo_asset_id'] = $asset?->id;
+            unset($data['photo_asset_uuid']);
+        }
+
+        $profile->fill($data)->save();
+
+        return response()->json($this->decorateProfile($profile));
     }
 
-    /**
-     * Get my settings (owner or admin with ?user_id=UUID).
-     *
-     * @authenticated
-     * @queryParam user_id string UUID of another user (admin only).
-     * @response 200 {"settings":{"user_id":"0198...","tz":"America/Edmonton","locale":"uk","privacy":{},"notifications":{}}}
-     */
     public function getSettings(Request $request): JsonResponse
     {
         $u = $request->user();
@@ -92,18 +75,6 @@ class ProfileController extends Controller
         return response()->json(['settings' => $settings]);
     }
 
-    /**
-     * Update my settings (owner or admin with ?user_id=UUID).
-     *
-     * @authenticated
-     * @queryParam user_id string UUID of another user (admin only).
-     * @bodyParam tz string required Example: America/Edmonton
-     * @bodyParam locale string required Example: uk
-     * @bodyParam privacy object
-     * @bodyParam notifications object
-     * @response 200 {"settings":{"user_id":"0198...","tz":"America/Edmonton","locale":"uk","privacy":{},"notifications":{}}}
-     * @response 422 {"message":"The given data was invalid.","errors":{"tz":["The tz field is required."]}}
-     */
     public function updateSettings(UpdateSettingsRequest $request): JsonResponse
     {
         $u = $request->user();
@@ -118,5 +89,45 @@ class ProfileController extends Controller
         $settings->fill($request->validated())->save();
 
         return response()->json(['settings' => $settings]);
+    }
+
+    /**
+     * Add photo_url to payload if photo_asset_id is set.
+     */
+    private function decorateProfile(UserProfile $profile): array
+    {
+        $out = $profile->toArray();
+        $out['photo_url'] = null;
+
+        $asset = null;
+
+        // 1) якщо прив'язано явно — беремо його
+        if ($profile->photo_asset_id) {
+            $asset = Asset::find($profile->photo_asset_id);
+        }
+
+        // 2) fallback: якщо не прив'язано, шукаємо останній asset з meta.alt = "avatar" цього юзера
+        if (!$asset) {
+            $asset = Asset::where('owner_user_id', $profile->user_id)
+                ->where('meta->alt', 'avatar')        // Postgres JSONB оператор
+                ->orderByDesc('created_at')
+                ->first();
+            // (опційно) запам'ятати знайдений id у профілі, щоб наступного разу не шукати
+            if ($asset) {
+                $profile->forceFill(['photo_asset_id' => $asset->id])->save();
+            }
+        }
+
+        if ($asset) {
+            // пробуємо підписаний URL (S3), або публічний (local)
+            $disk = config('filesystems.default', env('FILESYSTEM_DISK', 'public'));
+            $url  = app(FileStorageService::class)->temporaryUrl($asset->storage_key, $disk, 3600);
+            if (!$url) {
+                try { $url = Storage::disk($disk)->url($asset->storage_key); } catch (\Throwable) {}
+            }
+            $out['photo_url'] = $url;
+        }
+
+        return $out;
     }
 }

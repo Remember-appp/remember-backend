@@ -23,6 +23,7 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/me/profile',    [ProfileController::class, 'get']);
     Route::put('/me/profile',    [ProfileController::class, 'update']);
+    Route::patch('/me/profile', [ProfileController::class, 'update']);
 
     Route::get('/me/settings',   [ProfileController::class, 'getSettings']);
     Route::put('/me/settings',   [ProfileController::class, 'updateSettings']);

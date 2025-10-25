@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('owner_user_id')           // bigint FK -> users.id
             ->constrained('users')
                 ->cascadeOnDelete();
+            $table->string('disk', 50)->nullable();
 
             $table->string('storage_key');
             // Optional: if you store on multiple disks, uncomment next line:

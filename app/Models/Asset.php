@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class Asset extends Model
 {
     public $timestamps = false;
 
     protected $fillable = [
-        'uuid',
+        'uuid',          // public id
         'owner_user_id',
+        'disk',
         'storage_key',
         'mime',
         'size_bytes',
@@ -21,10 +23,20 @@ class Asset extends Model
     ];
 
     protected $casts = [
-        'uuid' => 'string',
-        'meta' => 'array',
+        'uuid'       => 'string',
+        'meta'       => 'array',
         'created_at' => 'datetime',
     ];
+
+    // Автогенерація uuid, якщо не передано
+    protected static function booted(): void
+    {
+        static::creating(function (self $m) {
+            if (empty($m->uuid)) {
+                $m->uuid = (string) Str::uuid();
+            }
+        });
+    }
 
     public function owner(): BelongsTo
     {
