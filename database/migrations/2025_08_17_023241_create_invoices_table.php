@@ -2,32 +2,39 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
         Schema::create('invoices', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('subscription_id');
+            $table->bigIncrements('id');       // internal PK
+            $table->uuid('uuid')->unique();    // public identifier
+
+            $table->foreignId('subscription_id')  // BIGINT FK -> subscriptions.id
+            ->constrained('subscriptions')
+                ->cascadeOnDelete();
+
             $table->bigInteger('amount_cents');
             $table->string('currency')->default('USD');
             $table->string('status'); // open/paid/void/uncollectible
             $table->timestampTz('issued_at')->useCurrent();
             $table->timestampTz('paid_at')->nullable();
 
-            $table->foreign('subscription_id')->references('id')->on('subscriptions')->cascadeOnDelete();
             $table->index('subscription_id');
+            $table->index('status');
         });
+
+        // optional strictness
+        DB::statement("ALTER TABLE invoices
+                       ADD CONSTRAINT invoices_status_chk
+                       CHECK (status IN ('open','paid','void','uncollectible'))");
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('invoices');

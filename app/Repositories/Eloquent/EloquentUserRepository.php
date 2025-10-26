@@ -31,7 +31,7 @@ class EloquentUserRepository implements UserRepository
         return $q->paginate(max(1, min($f->perPage, 100)))->withQueryString();
     }
 
-    public function findOrFail(string $id): User
+    public function findOrFail(int $id): User
     {
         return User::with('roles:id,name')->findOrFail($id);
     }

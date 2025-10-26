@@ -20,7 +20,7 @@ class UserService
         return $this->repo->paginate($filter);
     }
 
-    public function show(string $id): User
+    public function show(int $id): User
     {
         return $this->repo->findOrFail($id);
     }

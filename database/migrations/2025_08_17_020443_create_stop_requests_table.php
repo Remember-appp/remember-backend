@@ -1,36 +1,44 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
         Schema::create('stop_requests', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('case_id');
-            $table->uuid('requester_id')->nullable(); // FK → users.id
+            $table->bigIncrements('id');       // internal PK
+            $table->uuid('uuid')->unique();    // public identifier
+
+            $table->foreignId('case_id')       // BIGINT FK -> death_activation_cases.id
+            ->constrained('death_activation_cases')
+                ->cascadeOnDelete();
+
+            $table->foreignId('requester_id')  // BIGINT FK -> users.id
+            ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             $table->text('reason_text')->nullable();
             $table->string('state')->default('pending'); // pending/accepted/rejected
-            $table->json('evidence_assets')->nullable(); // array asset_id
+            $table->json('evidence_assets')->nullable(); // array of asset_id
             $table->timestampTz('created_at')->useCurrent();
             $table->timestampTz('decided_at')->nullable();
 
-            $table->foreign('case_id')->references('id')->on('death_activation_cases')->cascadeOnDelete();
-            $table->foreign('requester_id')->references('id')->on('users')->nullOnDelete();
             $table->index('case_id');
             $table->index('state');
         });
+
+        // Optional strictness
+        // DB::statement("ALTER TABLE stop_requests ADD CHECK (state IN ('pending','accepted','rejected'))");
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('stop_requests');

@@ -2,34 +2,39 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        // Keep pgcrypto if you use gen_random_uuid() elsewhere
+        DB::statement('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
         Schema::create('messages', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('user_id');
+            $table->bigIncrements('id');            // internal PK
+            $table->uuid('uuid')->unique();         // public identifier
+
+            $table->foreignId('user_id')            // bigint FK -> users.id
+            ->constrained('users')
+                ->cascadeOnDelete();
+
             $table->string('title')->nullable();
             $table->text('body_text')->nullable();
+
+            // Consider enum in DB if you want strictness; string is fine for now
             $table->string('status')->default('draft'); // draft/scheduled/locked/queued/delivered/halted/cancelled
+
             $table->timestampTz('locked_at')->nullable();
             $table->timestampsTz();
 
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->index('user_id');
             $table->index('status');
             $table->index(['user_id','status']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('messages');

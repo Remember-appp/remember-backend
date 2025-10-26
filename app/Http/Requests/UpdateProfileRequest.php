@@ -7,12 +7,13 @@ class UpdateProfileRequest extends FormRequest {
     public function authorize(): bool { return auth()->check(); }
     public function rules(): array {
         return [
-            'display_name'       => 'nullable|string|max:255',
-            'bio'                => 'nullable|string|max:2000',
-            'photo_asset_id'     => 'nullable|uuid|exists:assets,id',
-            'birth_date'         => 'nullable|date|before:today',
-            'favorite_phrases'   => 'nullable|array',
-            'favorite_phrases.*' => 'string|max:200',
+            'display_name'       => ['nullable','string','max:255'],
+            'bio'                => ['nullable','string','max:2000'],
+            'photo_asset_id'     => ['nullable','integer','exists:assets,id'],
+            'photo_asset_uuid'   => ['nullable','uuid','exists:assets,uuid'],
+            'birth_date'         => ['nullable','date'],
+            'favorite_phrases'   => ['nullable','array'],
+            'favorite_phrases.*' => ['string'],
         ];
     }
 }
