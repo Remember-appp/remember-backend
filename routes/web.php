@@ -14,14 +14,17 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 });
 
-Route::prefix('admin')
-    ->middleware(['auth'])
-    ->as('admin.')
-    ->group(function () {
-        Route::resource('users', UserController::class)
-            ->parameters(['users' => 'user'])
-            ->except(['create','edit']);
-    });
+
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');      // Inertia list + filters
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+
+    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show'); // Inertia show (optional)
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+});
 
 
 Route::view('/api/docs', 'api-swagger');

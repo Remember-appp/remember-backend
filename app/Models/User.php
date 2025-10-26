@@ -18,17 +18,15 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
-    // PK now auto-incrementing bigint (Laravel defaults)
-    public $incrementing = true;
-    protected $keyType = 'int';
-
     protected $fillable = [
         'name',
         'email',
         'password',
         'phone',
         'status',
-         'uuid'
+        'uuid',
+        'created_at',
+        'updated_at',
     ];
 
     protected $hidden = [
@@ -53,10 +51,10 @@ class User extends Authenticatable
         });
     }
 
-    public function getRouteKeyName(): string
-    {
-        return 'uuid';
-    }
+//    public function getRouteKeyName(): string
+//    {
+//        return 'uuid';
+//    }
 
     public function authIdentities(): HasMany { return $this->hasMany(UserAuthIdentity::class); }
     public function profile(): HasOne { return $this->hasOne(UserProfile::class, 'user_id'); }
